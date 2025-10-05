@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Activity, ArrowDownRight, ArrowUpRight, Search, TrendingUp, Wallet } from "lucide-react"
+import { Activity, ArrowDownRight, ArrowUpRight, Gauge, Search, TrendingUp, Wallet } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 import { formatCurrency } from "@/lib/format"
 import {
   Area,
@@ -84,7 +85,80 @@ const chartData = [
   { month: "Out", entradas: 58000, saidas: 41000 },
 ]
 
-export function CashFlow() {
+type CashFlowSummaryCard = {
+  title: string
+  value: string
+  description: string
+  delta?: string
+  deltaTone: "positive" | "negative" | "neutral"
+  icon: LucideIcon
+  accent: string
+  valueClass: string
+}
+
+type CashFlowSummary = {
+  summaryCards: readonly CashFlowSummaryCard[]
+  currentBalance: number
+  monthIncome: number
+  monthExpense: number
+  projectedBalance: number
+  variation: number
+}
+
+export function getCashFlowSummary(): CashFlowSummary {
+  const currentBalance = 125000
+  const monthIncome = mockTransactions.filter((t) => t.type === "income").reduce((sum, t) => sum + t.amount, 0)
+  const monthExpense = mockTransactions.filter((t) => t.type === "expense").reduce((sum, t) => sum + t.amount, 0)
+  const projectedBalance = currentBalance + monthIncome - monthExpense
+  const variation = monthExpense === 0 ? 0 : ((monthIncome - monthExpense) / monthExpense) * 100
+
+  const summaryCards: CashFlowSummaryCard[] = [
+    {
+      title: "Saldo atual",
+      value: formatCurrency(currentBalance),
+      description: "Disponível agora",
+      delta: "+R$ 18 mil",
+      deltaTone: "positive",
+      icon: Wallet,
+      accent: "bg-primary/12 text-primary",
+      valueClass: "text-primary",
+    },
+    {
+      title: "Entradas do mês",
+      value: formatCurrency(monthIncome),
+      description: "Recebimentos consolidados",
+      delta: "+8,1%",
+      deltaTone: "positive",
+      icon: ArrowUpRight,
+      accent: "bg-emerald-100 text-emerald-600",
+      valueClass: "text-emerald-600",
+    },
+    {
+      title: "Saídas do mês",
+      value: formatCurrency(monthExpense),
+      description: "Pagamentos realizados",
+      delta: "-4,3%",
+      deltaTone: "positive",
+      icon: ArrowDownRight,
+      accent: "bg-rose-100 text-rose-600",
+      valueClass: "text-rose-600",
+    },
+    {
+      title: "Saldo projetado",
+      value: formatCurrency(projectedBalance),
+      description: "Após movimentações previstas",
+      delta: "+5,4%",
+      deltaTone: "positive",
+      icon: Activity,
+      accent: "bg-indigo-100 text-indigo-600",
+      valueClass: "text-foreground",
+    },
+  ]
+
+  return { summaryCards, currentBalance, monthIncome, monthExpense, projectedBalance, variation }
+}
+
+export function CashFlow({ showSummary = true, showHeader = true }: { showSummary?: boolean; showHeader?: boolean }) {
   const [typeFilter, setTypeFilter] = useState<string>("all")
   const [searchQuery, setSearchQuery] = useState("")
 
@@ -94,85 +168,71 @@ export function CashFlow() {
     return matchesType && matchesSearch
   })
 
-  const currentBalance = 125000
-  const monthIncome = mockTransactions.filter((t) => t.type === "income").reduce((sum, t) => sum + t.amount, 0)
-  const monthExpense = mockTransactions.filter((t) => t.type === "expense").reduce((sum, t) => sum + t.amount, 0)
-  const projectedBalance = currentBalance + monthIncome - monthExpense
-  const variation = ((monthIncome - monthExpense) / monthExpense) * 100
-
-  const summaryCards = [
-    {
-      title: "Saldo atual",
-      value: formatCurrency(currentBalance),
-      description: "Disponível agora",
-      icon: Wallet,
-      accent: "bg-blue-100/60 text-blue-600",
-      valueClass: "text-blue-600",
-    },
-    {
-      title: "Entradas do mês",
-      value: formatCurrency(monthIncome),
-      description: "Recebimentos consolidados",
-      icon: ArrowUpRight,
-      accent: "bg-emerald-100/60 text-emerald-600",
-      valueClass: "text-emerald-600",
-    },
-    {
-      title: "Saídas do mês",
-      value: formatCurrency(monthExpense),
-      description: "Pagamentos realizados",
-      icon: ArrowDownRight,
-      accent: "bg-red-100/65 text-red-600",
-      valueClass: "text-red-600",
-    },
-    {
-      title: "Saldo projetado",
-      value: formatCurrency(projectedBalance),
-      description: "Após movimentações previstas",
-      icon: Activity,
-      accent: "bg-purple-100/60 text-purple-600",
-      valueClass: "text-foreground",
-    },
-  ] as const
+  const { summaryCards, currentBalance, monthIncome, monthExpense, variation } = getCashFlowSummary()
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col gap-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.32em] text-muted-foreground">Fluxo de caixa</p>
-        <h3 className="text-2xl font-semibold text-foreground">Acompanhe a respiração financeira do negócio com suavidade</h3>
-      </div>
+      {showHeader && (
+        <div className="flex flex-col gap-2">
+          <Badge variant="outline" className="w-fit border-transparent bg-secondary/60 px-4 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-secondary-foreground/80">
+            Fluxo de caixa
+          </Badge>
+          <h3 className="text-2xl font-semibold tracking-tight text-foreground">Visualize entradas e saídas em um ritmo sustentável</h3>
+          <p className="max-w-2xl text-sm text-muted-foreground">
+            Compare períodos, ajuste projeções rapidamente e antecipe decisões de investimento com métricas confiáveis.
+          </p>
+        </div>
+      )}
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {summaryCards.map((card) => (
-          <Card
-            key={card.title}
-            className="border-white/70 bg-white/80 p-7 shadow-[0_32px_80px_-60px_rgba(31,27,26,0.45)] backdrop-blur-md transition-all hover:-translate-y-1 hover:shadow-[0_38px_90px_-58px_rgba(31,27,26,0.5)] dark:border-white/10 dark:bg-card/80"
-          >
-            <CardHeader className="flex flex-row items-start justify-between space-y-0 px-0">
-              <CardTitle className="text-sm font-semibold uppercase tracking-[0.22em] text-muted-foreground/80">
-                {card.title}
-              </CardTitle>
-              <div className={`flex size-9 items-center justify-center rounded-full ${card.accent}`}>
-                <card.icon className="h-4 w-4" />
-              </div>
-            </CardHeader>
-            <CardContent className="px-0">
-              <div className={`text-2xl font-semibold ${card.valueClass}`}>{card.value}</div>
-              <p className="mt-1 text-xs text-muted-foreground">{card.description}</p>
-              {card.title === "Saldo projetado" && (
-                <p className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-emerald-600">
-                  <TrendingUp className="h-3 w-3" />
-                  {variation > 0 ? "+" : ""}
-                  {variation.toFixed(1)}% vs mês anterior
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {showSummary && (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {summaryCards.map((card) => (
+            <Card
+              key={card.title}
+              className="group border-white/60 bg-gradient-to-br from-white/95 via-white/90 to-indigo-50/60 p-6 shadow-[0_36px_120px_-80px_rgba(16,27,55,0.55)] transition-all hover:-translate-y-0.5 hover:shadow-[0_40px_120px_-72px_rgba(16,27,55,0.58)] dark:border-white/10 dark:from-card/85 dark:via-card/80 dark:to-card/80"
+            >
+              <CardHeader className="flex flex-row items-start justify-between space-y-0 px-0">
+                <CardTitle className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground/80">
+                  {card.title}
+                </CardTitle>
+                <div className={`flex size-9 items-center justify-center rounded-full ${card.accent}`}>
+                  <card.icon className="h-4 w-4" />
+                </div>
+              </CardHeader>
+              <CardContent className="px-0">
+                <div className={`text-2xl font-semibold ${card.valueClass}`}>{card.value}</div>
+                <p className="mt-1 text-xs text-muted-foreground">{card.description}</p>
+                {card.title === "Saldo projetado" && (
+                  <p className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-emerald-600">
+                    <TrendingUp className="h-3 w-3" />
+                    {variation > 0 ? "+" : ""}
+                    {variation.toFixed(1)}% vs mês anterior
+                  </p>
+                )}
+                {card.delta && (
+                  <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+                    <span
+                      className={`inline-flex items-center rounded-full px-3 py-1 font-semibold tracking-tight ${
+                        card.deltaTone === "positive"
+                          ? "bg-emerald-100 text-emerald-600"
+                          : card.deltaTone === "negative"
+                            ? "bg-rose-100 text-rose-600"
+                            : "bg-slate-100 text-slate-600"
+                      }`}
+                    >
+                      {card.delta}
+                    </span>
+                    ritmo projetado
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="border-white/70 bg-white/85 shadow-[0_38px_100px_-70px_rgba(31,27,26,0.52)] dark:border-white/10 dark:bg-card/85">
+        <Card className="rounded-3xl border-white/60 bg-white/85 shadow-[0_48px_140px_-90px_rgba(16,27,55,0.55)] dark:border-white/10 dark:bg-card/85">
           <CardHeader className="px-0">
             <CardTitle className="text-lg font-semibold text-foreground">Fluxo de Caixa - Últimos 6 meses</CardTitle>
           </CardHeader>
@@ -181,12 +241,12 @@ export function CashFlow() {
               <AreaChart data={chartData}>
                 <defs>
                   <linearGradient id="colorEntradas" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                    <stop offset="5%" stopColor="var(--chart-2)" stopOpacity={0.26} />
+                    <stop offset="95%" stopColor="var(--chart-2)" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="colorSaidas" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                    <stop offset="5%" stopColor="var(--chart-3)" stopOpacity={0.26} />
+                    <stop offset="95%" stopColor="var(--chart-3)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -201,28 +261,14 @@ export function CashFlow() {
                   formatter={(value: number) => formatCurrency(value)}
                 />
                 <Legend />
-                <Area
-                  type="monotone"
-                  dataKey="entradas"
-                  stroke="#10b981"
-                  fillOpacity={1}
-                  fill="url(#colorEntradas)"
-                  name="Entradas"
-                />
-                <Area
-                  type="monotone"
-                  dataKey="saidas"
-                  stroke="#ef4444"
-                  fillOpacity={1}
-                  fill="url(#colorSaidas)"
-                  name="Saídas"
-                />
+                <Area type="monotone" dataKey="entradas" stroke="var(--chart-2)" fillOpacity={1} fill="url(#colorEntradas)" name="Entradas" />
+                <Area type="monotone" dataKey="saidas" stroke="var(--chart-3)" fillOpacity={1} fill="url(#colorSaidas)" name="Saídas" />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        <Card className="border-white/70 bg-white/85 shadow-[0_38px_100px_-70px_rgba(31,27,26,0.52)] dark:border-white/10 dark:bg-card/85">
+        <Card className="rounded-3xl border-white/60 bg-white/85 shadow-[0_48px_140px_-90px_rgba(16,27,55,0.55)] dark:border-white/10 dark:bg-card/85">
           <CardHeader className="px-0">
             <CardTitle className="text-lg font-semibold text-foreground">Comparativo mensal</CardTitle>
           </CardHeader>
@@ -241,15 +287,15 @@ export function CashFlow() {
                   formatter={(value: number) => formatCurrency(value)}
                 />
                 <Legend />
-                <Bar dataKey="entradas" fill="#10b981" name="Entradas" radius={[8, 8, 0, 0]} />
-                <Bar dataKey="saidas" fill="#ef4444" name="Saídas" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="entradas" fill="var(--chart-2)" name="Entradas" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="saidas" fill="var(--chart-3)" name="Saídas" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="rounded-2xl border-white/60 bg-white/90 shadow-none transition-none hover:translate-y-0 hover:shadow-none dark:border-white/10 dark:bg-card/85">
+      <Card className="rounded-3xl border-white/60 bg-white/90 shadow-none transition-none hover:translate-y-0 hover:shadow-none dark:border-white/10 dark:bg-card/85">
         <CardHeader className="px-0">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="space-y-1">
@@ -315,7 +361,7 @@ export function CashFlow() {
                       <TableCell>
                         <Badge
                           className={`border-transparent px-4 py-1 text-xs font-semibold tracking-[0.2em] uppercase ${
-                            isIncome ? "bg-emerald-100/70 text-emerald-600" : "bg-red-100/65 text-red-600"
+                            isIncome ? "bg-emerald-100 text-emerald-600" : "bg-rose-100 text-rose-600"
                           }`}
                         >
                           <span className="flex items-center gap-2">
@@ -336,6 +382,37 @@ export function CashFlow() {
           </Table>
         </CardContent>
       </Card>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card className="rounded-3xl border-dashed border-primary/30 bg-primary/5 p-6 shadow-none">
+          <CardHeader className="px-0">
+            <CardTitle className="text-base font-semibold text-primary">Indicadores operacionais</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 px-0 text-sm text-primary/80">
+            <p>
+              <Gauge className="mr-2 inline h-4 w-4" /> Índice de cobertura em {((monthIncome - monthExpense + currentBalance) / monthExpense).toFixed(1)}× para os próximos 60 dias.
+            </p>
+            <p>
+              <Activity className="mr-2 inline h-4 w-4" /> Burn rate ajustado em {formatCurrency(monthExpense - monthIncome)} considerando metas do trimestre.
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="rounded-3xl border-dashed border-emerald-300/60 bg-emerald-50/70 p-6 shadow-none">
+          <CardHeader className="px-0">
+            <CardTitle className="text-base font-semibold text-emerald-700">Ações recomendadas</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-3 px-0 text-sm text-emerald-700">
+            <div className="flex items-start gap-2">
+              <ArrowUpRight className="mt-0.5 h-4 w-4" />
+              <span>Reinvestir excedente de caixa em aplicações de curto prazo com liquidez diária.</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <ArrowDownRight className="mt-0.5 h-4 w-4 text-rose-600" />
+              <span>Antecipar pagamentos com desconto para fornecedores estratégicos e otimizar margem.</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
