@@ -5,27 +5,36 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AccountsReceivable } from "@/components/accounts-receivable"
 import { AccountsPayable } from "@/components/accounts-payable"
 import { CashFlow } from "@/components/cash-flow"
-import { Plus } from "lucide-react"
+import { LineChart, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 
 export function FinancialDashboard() {
   const [activeTab, setActiveTab] = useState("receivable")
 
   return (
-    <div className="container mx-auto p-4 md:p-6 lg:p-8 space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-balance">Controle Financeiro</h1>
-          <p className="text-muted-foreground mt-1">Gerencie suas contas a receber, pagar e fluxo de caixa</p>
+    <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 pb-16 pt-12 md:px-8 lg:px-0">
+      <div className="flex flex-col gap-6">
+        <Badge variant="outline" className="w-fit border-white/60 bg-white/70 text-xs uppercase tracking-[0.32em] text-muted-foreground">
+          Painel financeiro
+        </Badge>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          
+          <div className="flex flex-wrap items-center gap-3">
+            <Button size="lg" className="px-8">
+              <Plus className="h-5 w-5" />
+              Nova transação
+            </Button>
+            <Button variant="outline" size="lg" className="px-8 text-foreground">
+              <LineChart className="h-5 w-5" />
+              Ver relatórios
+            </Button>
+          </div>
         </div>
-        <Button size="lg" className="gap-2">
-          <Plus className="h-4 w-4" />
-          Nova Transação
-        </Button>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:inline-grid">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col gap-8">
+        <TabsList className="w-full max-w-xl justify-between">
           <TabsTrigger value="receivable">Contas a Receber</TabsTrigger>
           <TabsTrigger value="payable">Contas a Pagar</TabsTrigger>
           <TabsTrigger value="cashflow">Fluxo de Caixa</TabsTrigger>

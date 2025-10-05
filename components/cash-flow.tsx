@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Wallet, TrendingUp, Activity, ArrowUpRight, ArrowDownRight, Search } from "lucide-react"
+import { Activity, ArrowDownRight, ArrowUpRight, Search, TrendingUp, Wallet } from "lucide-react"
 import { formatCurrency } from "@/lib/format"
 import {
   Area,
@@ -100,64 +100,81 @@ export function CashFlow() {
   const projectedBalance = currentBalance + monthIncome - monthExpense
   const variation = ((monthIncome - monthExpense) / monthExpense) * 100
 
+  const summaryCards = [
+    {
+      title: "Saldo atual",
+      value: formatCurrency(currentBalance),
+      description: "Disponível agora",
+      icon: Wallet,
+      accent: "bg-blue-100/60 text-blue-600",
+      valueClass: "text-blue-600",
+    },
+    {
+      title: "Entradas do mês",
+      value: formatCurrency(monthIncome),
+      description: "Recebimentos consolidados",
+      icon: ArrowUpRight,
+      accent: "bg-emerald-100/60 text-emerald-600",
+      valueClass: "text-emerald-600",
+    },
+    {
+      title: "Saídas do mês",
+      value: formatCurrency(monthExpense),
+      description: "Pagamentos realizados",
+      icon: ArrowDownRight,
+      accent: "bg-red-100/65 text-red-600",
+      valueClass: "text-red-600",
+    },
+    {
+      title: "Saldo projetado",
+      value: formatCurrency(projectedBalance),
+      description: "Após movimentações previstas",
+      icon: Activity,
+      accent: "bg-purple-100/60 text-purple-600",
+      valueClass: "text-foreground",
+    },
+  ] as const
+
   return (
-    <div className="space-y-6">
-      {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="transition-all hover:shadow-md border-blue-200 dark:border-blue-900/30">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Saldo Atual</CardTitle>
-            <Wallet className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-blue-600">{formatCurrency(currentBalance)}</div>
-            <p className="text-xs text-muted-foreground mt-1">Disponível agora</p>
-          </CardContent>
-        </Card>
-
-        <Card className="transition-all hover:shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Entradas do Mês</CardTitle>
-            <ArrowUpRight className="h-4 w-4 text-emerald-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-emerald-600">{formatCurrency(monthIncome)}</div>
-            <p className="text-xs text-muted-foreground mt-1">Recebimentos</p>
-          </CardContent>
-        </Card>
-
-        <Card className="transition-all hover:shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Saídas do Mês</CardTitle>
-            <ArrowDownRight className="h-4 w-4 text-red-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">{formatCurrency(monthExpense)}</div>
-            <p className="text-xs text-muted-foreground mt-1">Pagamentos</p>
-          </CardContent>
-        </Card>
-
-        <Card className="transition-all hover:shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Saldo Projetado</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(projectedBalance)}</div>
-            <p className="text-xs text-emerald-600 mt-1 flex items-center gap-1">
-              <TrendingUp className="h-3 w-3" />
-              {variation > 0 ? "+" : ""}
-              {variation.toFixed(1)}% vs mês anterior
-            </p>
-          </CardContent>
-        </Card>
+    <div className="space-y-8">
+      <div className="flex flex-col gap-2">
+        <p className="text-xs font-semibold uppercase tracking-[0.32em] text-muted-foreground">Fluxo de caixa</p>
+        <h3 className="text-2xl font-semibold text-foreground">Acompanhe a respiração financeira do negócio com suavidade</h3>
       </div>
 
-      {/* Charts */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {summaryCards.map((card) => (
+          <Card
+            key={card.title}
+            className="border-white/70 bg-white/80 p-7 shadow-[0_32px_80px_-60px_rgba(31,27,26,0.45)] backdrop-blur-md transition-all hover:-translate-y-1 hover:shadow-[0_38px_90px_-58px_rgba(31,27,26,0.5)] dark:border-white/10 dark:bg-card/80"
+          >
+            <CardHeader className="flex flex-row items-start justify-between space-y-0 px-0">
+              <CardTitle className="text-sm font-semibold uppercase tracking-[0.22em] text-muted-foreground/80">
+                {card.title}
+              </CardTitle>
+              <div className={`flex size-9 items-center justify-center rounded-full ${card.accent}`}>
+                <card.icon className="h-4 w-4" />
+              </div>
+            </CardHeader>
+            <CardContent className="px-0">
+              <div className={`text-2xl font-semibold ${card.valueClass}`}>{card.value}</div>
+              <p className="mt-1 text-xs text-muted-foreground">{card.description}</p>
+              {card.title === "Saldo projetado" && (
+                <p className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-emerald-600">
+                  <TrendingUp className="h-3 w-3" />
+                  {variation > 0 ? "+" : ""}
+                  {variation.toFixed(1)}% vs mês anterior
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Fluxo de Caixa - Últimos 6 Meses</CardTitle>
+        <Card className="border-white/70 bg-white/85 shadow-[0_38px_100px_-70px_rgba(31,27,26,0.52)] dark:border-white/10 dark:bg-card/85">
+          <CardHeader className="px-0">
+            <CardTitle className="text-lg font-semibold text-foreground">Fluxo de Caixa - Últimos 6 meses</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -205,9 +222,9 @@ export function CashFlow() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Comparativo Mensal</CardTitle>
+        <Card className="border-white/70 bg-white/85 shadow-[0_38px_100px_-70px_rgba(31,27,26,0.52)] dark:border-white/10 dark:bg-card/85">
+          <CardHeader className="px-0">
+            <CardTitle className="text-lg font-semibold text-foreground">Comparativo mensal</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -232,23 +249,25 @@ export function CashFlow() {
         </Card>
       </div>
 
-      {/* Transactions Table */}
-      <Card>
-        <CardHeader>
+      <Card className="rounded-2xl border-white/60 bg-white/90 shadow-none transition-none hover:translate-y-0 hover:shadow-none dark:border-white/10 dark:bg-card/85">
+        <CardHeader className="px-0">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <CardTitle>Movimentações Recentes</CardTitle>
-            <div className="flex flex-col gap-2 sm:flex-row">
+            <div className="space-y-1">
+              <CardTitle className="text-xl font-semibold text-foreground">Movimentações recentes</CardTitle>
+              <p className="text-sm text-muted-foreground">Use filtros leves para localizar entradas e saídas específicas.</p>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row">
               <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Buscar transação..."
-                  className="pl-8 w-full sm:w-[200px]"
+                  className="pl-10 sm:w-[220px]"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
               <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectTrigger className="w-full sm:w-[200px]">
                   <SelectValue placeholder="Tipo" />
                 </SelectTrigger>
                 <SelectContent>
@@ -260,62 +279,61 @@ export function CashFlow() {
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
+        <CardContent className="px-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Descrição</TableHead>
+                <TableHead className="hidden md:table-cell">Categoria</TableHead>
+                <TableHead>Data</TableHead>
+                <TableHead>Tipo</TableHead>
+                <TableHead className="text-right">Valor</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredTransactions.length === 0 ? (
                 <TableRow>
-                  <TableHead>Descrição</TableHead>
-                  <TableHead className="hidden md:table-cell">Categoria</TableHead>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead className="text-right">Valor</TableHead>
+                  <TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
+                    Nenhuma transação encontrada
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredTransactions.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                      Nenhuma transação encontrada
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredTransactions.map((item) => (
-                    <TableRow key={item.id} className="hover:bg-muted/50 transition-colors">
-                      <TableCell className="font-medium">{item.description}</TableCell>
+              ) : (
+                filteredTransactions.map((item) => {
+                  const isIncome = item.type === "income"
+
+                  return (
+                    <TableRow key={item.id}>
+                      <TableCell className="font-semibold text-foreground">{item.description}</TableCell>
                       <TableCell className="hidden md:table-cell">
-                        <Badge variant="outline">{item.category}</Badge>
+                        <Badge variant="outline" className="border-white/60 bg-white/60 text-foreground/80">
+                          {item.category}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-muted-foreground">
                         {new Date(item.date).toLocaleDateString("pt-BR")}
                       </TableCell>
                       <TableCell>
-                        {item.type === "income" ? (
-                          <Badge className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20">
-                            <ArrowUpRight className="h-3 w-3 mr-1" />
-                            Entrada
-                          </Badge>
-                        ) : (
-                          <Badge className="bg-red-500/10 text-red-700 dark:text-red-400 hover:bg-red-500/20">
-                            <ArrowDownRight className="h-3 w-3 mr-1" />
-                            Saída
-                          </Badge>
-                        )}
+                        <Badge
+                          className={`border-transparent px-4 py-1 text-xs font-semibold tracking-[0.2em] uppercase ${
+                            isIncome ? "bg-emerald-100/70 text-emerald-600" : "bg-red-100/65 text-red-600"
+                          }`}
+                        >
+                          <span className="flex items-center gap-2">
+                            {isIncome ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                            {isIncome ? "Entrada" : "Saída"}
+                          </span>
+                        </Badge>
                       </TableCell>
-                      <TableCell
-                        className={`text-right font-semibold ${
-                          item.type === "income" ? "text-emerald-600" : "text-red-600"
-                        }`}
-                      >
-                        {item.type === "income" ? "+" : "-"}
+                      <TableCell className={`text-right font-semibold ${isIncome ? "text-emerald-600" : "text-red-600"}`}>
+                        {isIncome ? "+" : "-"}
                         {formatCurrency(item.amount)}
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                  )
+                })
+              )}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
     </div>

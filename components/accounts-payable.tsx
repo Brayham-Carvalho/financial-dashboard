@@ -9,17 +9,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import {
-  ArrowDownRight,
   AlertCircle,
-  Clock,
-  TrendingDown,
-  Percent,
-  MoreVertical,
+  ArrowDownRight,
+  CalendarCheck,
   Check,
-  Calendar,
   Edit,
-  Trash2,
+  MoreVertical,
+  Percent,
+  PiggyBank,
   Search,
+  Trash2,
+  TrendingDown,
 } from "lucide-react"
 import { formatCurrency } from "@/lib/format"
 
@@ -132,101 +132,109 @@ export function AccountsPayable() {
   const getStatusBadge = (status: PayableStatus) => {
     switch (status) {
       case "paid":
-        return (
-          <Badge className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20">
-            Pago
-          </Badge>
-        )
+        return <Badge className="border-transparent bg-emerald-100/60 text-emerald-600">Pago</Badge>
       case "pending":
-        return (
-          <Badge className="bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20">Pendente</Badge>
-        )
+        return <Badge className="border-transparent bg-amber-100/60 text-amber-600">Pendente</Badge>
       case "overdue":
-        return <Badge className="bg-red-500/10 text-red-700 dark:text-red-400 hover:bg-red-500/20">Vencido</Badge>
+        return <Badge className="border-transparent bg-red-100/65 text-red-600">Vencido</Badge>
     }
   }
 
+  const summaryCards = [
+    {
+      title: "Total a pagar",
+      value: formatCurrency(totalPayable),
+      description: `${mockPayables.length} contas ativas`,
+      icon: ArrowDownRight,
+      accent: "bg-primary/18 text-primary",
+      valueClass: "text-foreground",
+    },
+    {
+      title: "Vencidos",
+      value: formatCurrency(overdue),
+      description: "Prioridade máxima",
+      icon: AlertCircle,
+      accent: "bg-red-100/65 text-red-600",
+      valueClass: "text-red-600",
+    },
+    {
+      title: "Próx. 30 dias",
+      value: formatCurrency(next30Days),
+      description: "Planeje seus pagamentos",
+      icon: CalendarCheck,
+      accent: "bg-amber-100/60 text-amber-600",
+      valueClass: "text-foreground",
+    },
+    {
+      title: "Futuros (+30d)",
+      value: formatCurrency(future),
+      description: "Compromissos agendados",
+      icon: TrendingDown,
+      accent: "bg-blue-100/60 text-blue-600",
+      valueClass: "text-foreground",
+    },
+    {
+      title: "Economia c/ descontos",
+      value: formatCurrency(discountSavings),
+      description: "Antecipações vantajosas",
+      icon: PiggyBank,
+      accent: "bg-emerald-100/65 text-emerald-600",
+      valueClass: "text-emerald-600",
+    },
+  ] as const
+
   return (
-    <div className="space-y-6">
-      {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-        <Card className="transition-all hover:shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total a Pagar</CardTitle>
-            <ArrowDownRight className="h-4 w-4 text-red-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalPayable)}</div>
-            <p className="text-xs text-muted-foreground mt-1">{mockPayables.length} contas</p>
-          </CardContent>
-        </Card>
-
-        <Card className="transition-all hover:shadow-md border-red-200 dark:border-red-900/30">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Vencidos</CardTitle>
-            <AlertCircle className="h-4 w-4 text-red-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">{formatCurrency(overdue)}</div>
-            <p className="text-xs text-muted-foreground mt-1">Pagar urgente</p>
-          </CardContent>
-        </Card>
-
-        <Card className="transition-all hover:shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Próximos 30 Dias</CardTitle>
-            <Clock className="h-4 w-4 text-amber-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(next30Days)}</div>
-            <p className="text-xs text-muted-foreground mt-1">A pagar em breve</p>
-          </CardContent>
-        </Card>
-
-        <Card className="transition-all hover:shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Futuros (30+ dias)</CardTitle>
-            <TrendingDown className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(future)}</div>
-            <p className="text-xs text-muted-foreground mt-1">Pagamentos futuros</p>
-          </CardContent>
-        </Card>
-
-        <Card className="transition-all hover:shadow-md border-emerald-200 dark:border-emerald-900/30">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Economia c/ Descontos</CardTitle>
-            <Percent className="h-4 w-4 text-emerald-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-emerald-600">{formatCurrency(discountSavings)}</div>
-            <p className="text-xs text-muted-foreground mt-1">Antecipações</p>
-          </CardContent>
-        </Card>
+    <div className="space-y-8">
+      <div className="flex flex-col gap-2">
+        <p className="text-xs font-semibold uppercase tracking-[0.32em] text-muted-foreground">Despesas</p>
+        <h3 className="text-2xl font-semibold text-foreground">Oriente seus pagamentos com clareza e leveza visual</h3>
       </div>
 
-      {/* Filters and Table */}
-      <Card>
-        <CardHeader>
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+        {summaryCards.map((card) => (
+          <Card
+            key={card.title}
+            className="border-white/70 bg-white/80 p-7 shadow-[0_32px_80px_-60px_rgba(31,27,26,0.45)] backdrop-blur-md transition-all hover:-translate-y-1 hover:shadow-[0_38px_90px_-58px_rgba(31,27,26,0.5)] dark:border-white/10 dark:bg-card/80"
+          >
+            <CardHeader className="flex flex-row items-start justify-between space-y-0 px-0">
+              <CardTitle className="text-sm font-semibold uppercase tracking-[0.22em] text-muted-foreground/80">
+                {card.title}
+              </CardTitle>
+              <div className={`flex size-9 items-center justify-center rounded-full ${card.accent}`}>
+                <card.icon className="h-4 w-4" />
+              </div>
+            </CardHeader>
+            <CardContent className="px-0">
+              <div className={`text-2xl font-semibold ${card.valueClass}`}>{card.value}</div>
+              <p className="mt-1 text-xs text-muted-foreground">{card.description}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <Card className="rounded-2xl border-white/60 bg-white/90 shadow-none transition-none hover:translate-y-0 hover:shadow-none dark:border-white/10 dark:bg-card/85">
+        <CardHeader className="px-0">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <CardTitle>Contas a Pagar</CardTitle>
-            <div className="flex flex-col gap-2 sm:flex-row">
+            <div className="space-y-1">
+              <CardTitle className="text-xl font-semibold text-foreground">Contas a Pagar</CardTitle>
+              <p className="text-sm text-muted-foreground">Acione filtros rápidos e acompanhe cada compromisso financeiro.</p>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row">
               <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Buscar fornecedor..."
-                  className="pl-8 w-full sm:w-[200px]"
+                  className="pl-10 sm:w-[220px]"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectTrigger className="w-full sm:w-[200px]">
                   <SelectValue placeholder="Categoria" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todas Categorias</SelectItem>
+                  <SelectItem value="all">Todas categorias</SelectItem>
                   <SelectItem value="suppliers">Fornecedores</SelectItem>
                   <SelectItem value="services">Serviços</SelectItem>
                   <SelectItem value="rent">Aluguel</SelectItem>
@@ -240,7 +248,7 @@ export function AccountsPayable() {
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todos os Status</SelectItem>
+                  <SelectItem value="all">Todos os status</SelectItem>
                   <SelectItem value="paid">Pago</SelectItem>
                   <SelectItem value="pending">Pendente</SelectItem>
                   <SelectItem value="overdue">Vencido</SelectItem>
@@ -249,88 +257,87 @@ export function AccountsPayable() {
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
+        <CardContent className="px-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Fornecedor</TableHead>
+                <TableHead>Valor</TableHead>
+                <TableHead className="hidden lg:table-cell">Emissão</TableHead>
+                <TableHead>Vencimento</TableHead>
+                <TableHead className="hidden md:table-cell">Categoria</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredPayables.length === 0 ? (
                 <TableRow>
-                  <TableHead>Fornecedor</TableHead>
-                  <TableHead>Valor</TableHead>
-                  <TableHead className="hidden lg:table-cell">Data de Emissão</TableHead>
-                  <TableHead>Vencimento</TableHead>
-                  <TableHead className="hidden md:table-cell">Categoria</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
+                  <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
+                    Nenhuma conta encontrada
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredPayables.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                      Nenhuma conta encontrada
+              ) : (
+                filteredPayables.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell className="font-semibold text-foreground">
+                      <div className="flex items-center gap-2">
+                        {item.supplier}
+                        {item.hasDiscount && (
+                          <Badge className="border-transparent bg-emerald-100/70 text-emerald-600">-5%</Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-semibold text-foreground/90">{formatCurrency(item.amount)}</TableCell>
+                    <TableCell className="hidden lg:table-cell text-muted-foreground">
+                      {new Date(item.issueDate).toLocaleDateString("pt-BR")}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {new Date(item.dueDate).toLocaleDateString("pt-BR")}
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <Badge variant="outline" className="border-white/60 bg-white/60 text-foreground/80">
+                        {categoryLabels[item.category]}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{getStatusBadge(item.status)}</TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-10 w-10 rounded-full bg-primary/5 text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                            <span className="sr-only">Abrir menu</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem className="gap-2">
+                            <Check className="h-4 w-4" />
+                            Marcar como pago
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="gap-2">
+                            <Percent className="h-4 w-4" />
+                            Negociar condição
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="gap-2">
+                            <Edit className="h-4 w-4" />
+                            Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="gap-2 text-destructive">
+                            <Trash2 className="h-4 w-4" />
+                            Excluir
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                ) : (
-                  filteredPayables.map((item) => (
-                    <TableRow key={item.id} className="hover:bg-muted/50 transition-colors">
-                      <TableCell className="font-medium">
-                        <div className="flex items-center gap-2">
-                          {item.supplier}
-                          {item.hasDiscount && (
-                            <Badge
-                              variant="outline"
-                              className="text-xs bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900"
-                            >
-                              -5%
-                            </Badge>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-semibold">{formatCurrency(item.amount)}</TableCell>
-                      <TableCell className="hidden lg:table-cell text-muted-foreground">
-                        {new Date(item.issueDate).toLocaleDateString("pt-BR")}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {new Date(item.dueDate).toLocaleDateString("pt-BR")}
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        <Badge variant="outline">{categoryLabels[item.category]}</Badge>
-                      </TableCell>
-                      <TableCell>{getStatusBadge(item.status)}</TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreVertical className="h-4 w-4" />
-                              <span className="sr-only">Abrir menu</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem className="gap-2">
-                              <Check className="h-4 w-4" />
-                              Marcar como pago
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="gap-2">
-                              <Calendar className="h-4 w-4" />
-                              Agendar pagamento
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="gap-2">
-                              <Edit className="h-4 w-4" />
-                              Editar
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="gap-2 text-destructive">
-                              <Trash2 className="h-4 w-4" />
-                              Excluir
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                ))
+              )}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
     </div>
